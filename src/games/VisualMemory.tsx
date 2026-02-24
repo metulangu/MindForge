@@ -62,14 +62,17 @@ export default function VisualMemory() {
     setGameState('blinking');
     
     setTimeout(() => {
-      // Step 2: Show target tiles
+      // Step 2: Show target tiles with a staggered effect
       setGameState('showing');
+      
+      // The duration of 'showing' should depend on the number of tiles
+      const showDuration = Math.max(1000, tCount * 200);
       
       setTimeout(() => {
         // Step 3: Start playing
         setGameState('playing');
-      }, 1000);
-    }, 400);
+      }, showDuration);
+    }, 600);
   }, []);
 
   const handleTileClick = (index: number) => {
@@ -203,22 +206,34 @@ export default function VisualMemory() {
             {Array.from({ length: gridSize * gridSize }).map((_, i) => {
               const isTarget = targetTiles.includes(i);
               const isSelected = selectedTiles.includes(i);
+              const targetIndex = targetTiles.indexOf(i);
               
               return (
                 <motion.button
                   key={i}
                   layout
+                  initial={false}
+                  animate={
+                    gameState === 'blinking' 
+                      ? { scale: 1.05, backgroundColor: "#ffffff", boxShadow: "0 0 30px rgba(255,255,255,0.5)" }
+                      : gameState === 'showing' && isTarget
+                        ? { 
+                            scale: [1, 1.1, 1],
+                            backgroundColor: ["rgba(255,255,255,0.05)", "#ffffff", "#ffffff"],
+                            boxShadow: ["0 0 0px rgba(255,255,255,0)", "0 0 20px rgba(255,255,255,0.3)", "0 0 20px rgba(255,255,255,0.3)"],
+                            transition: { delay: targetIndex * 0.1, duration: 0.5 }
+                          }
+                        : isSelected
+                          ? (isTarget 
+                              ? { backgroundColor: "#ffffff", boxShadow: "0 0 20px rgba(255,255,255,0.3)" }
+                              : { backgroundColor: "#ef4444", boxShadow: "0 0 20px rgba(239,68,68,0.3)" })
+                          : { scale: 1, backgroundColor: "rgba(255,255,255,0.05)", boxShadow: "0 0 0px rgba(0,0,0,0)" }
+                  }
                   whileTap={gameState === 'playing' ? { scale: 0.92 } : {}}
                   onClick={() => handleTileClick(i)}
                   className={cn(
-                    "rounded-xl sm:rounded-2xl transition-all duration-300 shadow-lg border border-white/5",
-                    gameState === 'blinking'
-                      ? "bg-white scale-105 shadow-[0_0_30px_rgba(255,255,255,0.5)]"
-                      : gameState === 'showing' 
-                        ? (isTarget ? "bg-white scale-100 shadow-[0_0_20px_rgba(255,255,255,0.3)]" : "bg-white/5")
-                        : (isSelected 
-                            ? (isTarget ? "bg-white shadow-[0_0_20px_rgba(255,255,255,0.3)]" : "bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.3)]") 
-                            : "bg-white/5 hover:bg-white/10")
+                    "rounded-xl sm:rounded-2xl transition-all duration-300 border border-white/5",
+                    gameState === 'playing' && !isSelected && "hover:bg-white/10"
                   )}
                 />
               );

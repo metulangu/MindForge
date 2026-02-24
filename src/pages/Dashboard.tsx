@@ -37,8 +37,8 @@ export function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div className="relative" ref={menuRef}>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className={cn(
@@ -50,7 +50,7 @@ export function Dashboard() {
           >
             <Filter size={18} className={selectedTag ? "text-indigo-500" : "text-slate-400"} />
             <span className="text-sm">
-              {selectedTag ? `Category: ${selectedTag}` : "All Categories"}
+              {selectedTag ? `Category: ${selectedTag}` : "Filter by Category"}
             </span>
             <ChevronDown 
               size={18} 
@@ -58,65 +58,73 @@ export function Dashboard() {
             />
           </button>
 
-          <AnimatePresence>
-            {isMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-full left-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden py-2"
-              >
-                <button
-                  onClick={() => {
-                    setSelectedTag(null);
-                    setIsMenuOpen(false);
-                  }}
-                  className={cn(
-                    "w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium transition-colors hover:bg-slate-50",
-                    !selectedTag ? "text-indigo-600 bg-indigo-50/50" : "text-slate-600"
-                  )}
-                >
-                  <span className="flex items-center gap-2">
-                    All Games
-                    <span className="text-[10px] opacity-50">({games.length})</span>
-                  </span>
-                  {!selectedTag && <Check size={16} />}
-                </button>
-                <div className="h-px bg-slate-100 my-1 mx-2" />
-                <div className="max-h-64 overflow-y-auto custom-scrollbar">
-                  {tagCounts.map(([tag, count]) => (
-                    <button
-                      key={tag}
-                      onClick={() => {
-                        setSelectedTag(tag);
-                        setIsMenuOpen(false);
-                      }}
-                      className={cn(
-                        "w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium transition-colors hover:bg-slate-50",
-                        selectedTag === tag ? "text-indigo-600 bg-indigo-50/50" : "text-slate-600"
-                      )}
-                    >
-                      <span className="flex items-center gap-2">
-                        {tag}
-                        <span className="text-[10px] opacity-50">({count})</span>
-                      </span>
-                      {selectedTag === tag && <Check size={16} />}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {selectedTag && (
+            <button 
+              onClick={() => setSelectedTag(null)}
+              className="text-xs font-bold text-slate-400 hover:text-red-500 transition-colors uppercase tracking-widest"
+            >
+              Clear Filter
+            </button>
+          )}
         </div>
 
-        {selectedTag && (
-          <button 
-            onClick={() => setSelectedTag(null)}
-            className="text-xs font-bold text-slate-400 hover:text-red-500 transition-colors uppercase tracking-widest"
-          >
-            Clear Filter
-          </button>
-        )}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <motion.div 
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  visible: {
+                    transition: {
+                      staggerChildren: 0.05
+                    }
+                  }
+                }}
+                className="flex flex-wrap gap-3 p-6 bg-slate-50/50 rounded-[2.5rem] border border-slate-100 shadow-inner"
+              >
+                <motion.button
+                  variants={{
+                    hidden: { opacity: 0, y: 10, scale: 0.9 },
+                    visible: { opacity: 1, y: 0, scale: 1 }
+                  }}
+                  onClick={() => setSelectedTag(null)}
+                  className={cn(
+                    "px-6 py-3 rounded-2xl text-sm font-black uppercase tracking-widest transition-all border flex items-center gap-2",
+                    !selectedTag 
+                      ? "bg-indigo-600 border-indigo-600 text-white shadow-[0_10px_20px_rgba(79,70,229,0.3)] scale-105" 
+                      : "bg-white border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-600"
+                  )}
+                >
+                  All Games <span className="text-[10px] opacity-60">({games.length})</span>
+                </motion.button>
+                {tagCounts.map(([tag, count]) => (
+                  <motion.button
+                    key={tag}
+                    variants={{
+                      hidden: { opacity: 0, y: 10, scale: 0.9 },
+                      visible: { opacity: 1, y: 0, scale: 1 }
+                    }}
+                    onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+                    className={cn(
+                      "px-6 py-3 rounded-2xl text-sm font-black uppercase tracking-widest transition-all border flex items-center gap-2",
+                      selectedTag === tag
+                        ? "bg-indigo-600 border-indigo-600 text-white shadow-[0_10px_20px_rgba(79,70,229,0.3)] scale-105"
+                        : "bg-white border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-600"
+                    )}
+                  >
+                    {tag} <span className={cn("text-[10px] opacity-60", selectedTag === tag ? "text-white" : "text-slate-400")}>({count})</span>
+                  </motion.button>
+                ))}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <motion.div 

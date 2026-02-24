@@ -85,12 +85,30 @@ export default function TypingTest() {
 
   return (
     <GameShell title="Typing Test" score={wpm} onRestart={() => setGameState('start')}>
-      <div className="absolute inset-0 bg-[#1a1c2c] flex flex-col items-center justify-center text-white p-6 select-none overflow-hidden">
+      <div className="absolute inset-0 bg-[#0f172a] flex flex-col items-center justify-center text-white p-6 select-none overflow-hidden">
         
-        {/* Background Decorative Elements */}
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500 rounded-full blur-[120px]" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500 rounded-full blur-[120px]" />
+        {/* Animated Background Gradients */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+          <motion.div 
+            animate={{ 
+              scale: [1, 1.2, 1],
+              rotate: [0, 90, 0],
+              x: [0, 100, 0],
+              y: [0, -50, 0]
+            }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-indigo-600 rounded-full blur-[120px]" 
+          />
+          <motion.div 
+            animate={{ 
+              scale: [1, 1.3, 1],
+              rotate: [0, -90, 0],
+              x: [0, -100, 0],
+              y: [0, 50, 0]
+            }}
+            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-purple-600 rounded-full blur-[120px]" 
+          />
         </div>
 
         {gameState === 'start' && (

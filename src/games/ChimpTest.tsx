@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { GameShell } from '@/components/GameShell';
 import { motion, AnimatePresence } from 'motion/react';
 import { Brain } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface NumberTile {
   id: number;
@@ -106,46 +107,106 @@ export default function ChimpTest() {
     <GameShell title="Chimp Test" score={numberCount} onRestart={resetGame}>
       <div 
         ref={containerRef}
-        className="absolute inset-0 bg-blue-600 overflow-hidden select-none"
+        className="absolute inset-0 bg-[#0f172a] overflow-hidden select-none"
       >
+        {/* Animated Background Gradients */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+          <motion.div 
+            animate={{ 
+              scale: [1, 1.2, 1],
+              rotate: [0, 90, 0],
+              x: [0, 100, 0],
+              y: [0, -50, 0]
+            }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-indigo-600 rounded-full blur-[120px]" 
+          />
+          <motion.div 
+            animate={{ 
+              scale: [1, 1.3, 1],
+              rotate: [0, -90, 0],
+              x: [0, -100, 0],
+              y: [0, 50, 0]
+            }}
+            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-purple-600 rounded-full blur-[120px]" 
+          />
+        </div>
+
         {gameState === 'start' && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-6 text-center space-y-8 z-30">
-            <Brain size={80} className="mb-4" />
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="absolute inset-0 flex flex-col items-center justify-center text-white p-6 text-center space-y-12 z-30"
+          >
+            <div className="relative">
+              <div className="absolute inset-0 bg-indigo-500 blur-3xl opacity-20 animate-pulse" />
+              <div className="relative bg-white/5 backdrop-blur-2xl p-10 rounded-[3rem] border border-white/10 shadow-2xl inline-block">
+                <Brain size={100} className="text-indigo-400" />
+              </div>
+            </div>
             <div className="space-y-4">
-              <h3 className="text-4xl font-bold">The Chimp Test</h3>
-              <p className="text-xl opacity-90 max-w-md">
+              <h1 className="text-7xl font-black italic uppercase tracking-tighter leading-none">Chimp Test</h1>
+              <p className="text-2xl text-slate-400 font-medium max-w-lg mx-auto">
                 Are you smarter than a chimpanzee? Click the numbers in order. 
                 After you click 1, the rest will be hidden!
               </p>
             </div>
             <button
               onClick={startLevel}
-              className="px-12 py-4 bg-amber-400 text-blue-900 rounded-xl font-bold text-2xl hover:bg-amber-300 transition-all shadow-lg transform hover:-translate-y-1"
+              className="group relative px-16 py-6 bg-indigo-600 rounded-2xl font-black text-2xl uppercase tracking-[0.2em] overflow-hidden transition-all hover:bg-indigo-500 hover:scale-105 active:scale-95 shadow-[0_0_50px_rgba(79,70,229,0.3)]"
             >
-              Start Test
+              <span className="relative z-10">Initiate Test</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
             </button>
-          </div>
+          </motion.div>
         )}
 
         {gameState === 'playing' && (
-          <div className="w-full h-full relative">
+          <div className="w-full h-full relative z-10">
+            <div className="absolute top-8 left-0 w-full flex justify-between items-center px-12 pointer-events-none">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-400">Sequence Size</span>
+                <span className="text-4xl font-black italic tracking-tighter text-white">{numberCount}</span>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-400 mb-2">Strikes</span>
+                <div className="flex gap-2">
+                  {[...Array(MAX_STRIKES)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={false}
+                      animate={{ 
+                        scale: i < strikes ? 1.2 : 1,
+                        opacity: i < strikes ? 1 : 0.2
+                      }}
+                      className={cn("w-8 h-1.5 rounded-full", i < strikes ? "bg-red-500" : "bg-white")}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {tiles.map(tile => (
               <motion.button
                 key={tile.id}
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
+                whileTap={{ scale: 0.92 }}
                 style={{
                   position: 'absolute',
                   left: tile.x,
                   top: tile.y,
-                  width: 64,
-                  height: 64,
+                  width: 80,
+                  height: 80,
                 }}
                 onClick={() => handleTileClick(tile)}
-                className={`
-                  flex items-center justify-center text-3xl font-bold rounded-lg border-2 border-white/30 transition-colors
-                  ${isHidden ? 'bg-white text-transparent' : 'bg-transparent text-white hover:bg-white/10'}
-                `}
+                className={cn(
+                  "flex items-center justify-center text-4xl font-black italic tracking-tighter rounded-2xl border-2 transition-all duration-300 shadow-2xl",
+                  isHidden 
+                    ? "bg-white border-white text-transparent" 
+                    : "bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20"
+                )}
               >
                 {!isHidden && tile.value}
               </motion.button>
@@ -154,44 +215,57 @@ export default function ChimpTest() {
         )}
 
         {gameState === 'result' && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-6 text-center space-y-12 z-30">
-            <div className="space-y-2">
-              <p className="text-2xl font-bold opacity-70 uppercase tracking-widest">Numbers</p>
-              <p className="text-8xl font-bold">{numberCount - (tiles.length === 0 ? 1 : 0)}</p>
-            </div>
-            
-            <div className="space-y-2">
-              <p className="text-2xl font-bold opacity-70 uppercase tracking-widest">Strikes</p>
-              <p className="text-5xl font-bold">{strikes} of {MAX_STRIKES}</p>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="absolute inset-0 flex flex-col items-center justify-center text-white p-6 text-center space-y-16 z-30"
+          >
+            <div className="grid grid-cols-2 gap-12 max-w-4xl mx-auto">
+              <div className="space-y-4 bg-white/5 backdrop-blur-xl p-10 rounded-[3rem] border border-white/10">
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Numbers Cleared</p>
+                <p className="text-8xl font-black italic tracking-tighter text-emerald-400">{numberCount - (tiles.length === 0 ? 1 : 0)}</p>
+              </div>
+              <div className="space-y-4 bg-white/5 backdrop-blur-xl p-10 rounded-[3rem] border border-white/10">
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Strikes</p>
+                <p className="text-8xl font-black italic tracking-tighter text-red-500">{strikes}</p>
+              </div>
             </div>
 
             <button
               onClick={startLevel}
-              className="px-12 py-4 bg-amber-400 text-blue-900 rounded-xl font-bold text-2xl hover:bg-amber-300 transition-all shadow-lg transform hover:-translate-y-1"
+              className="px-20 py-6 bg-indigo-600 rounded-2xl font-black text-2xl uppercase tracking-[0.2em] hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95 shadow-2xl"
             >
-              Continue
+              Next Sequence
             </button>
-          </div>
+          </motion.div>
         )}
 
         {gameState === 'gameOver' && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-6 text-center space-y-12 z-30">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="absolute inset-0 flex flex-col items-center justify-center text-white p-6 text-center space-y-12 z-30"
+          >
             <div className="space-y-4">
-              <h3 className="text-5xl font-bold">Test Over</h3>
-              <p className="text-2xl opacity-80">Your memory score</p>
+              <h3 className="text-8xl font-black italic uppercase tracking-tighter text-red-500">Test Over</h3>
+              <p className="text-2xl text-slate-400 font-medium">Neural capacity exceeded</p>
             </div>
             
-            <div className="text-9xl font-bold text-amber-400">
-              {maxNumbersReached}
+            <div className="relative inline-block">
+              <div className="absolute inset-0 bg-indigo-500 blur-3xl opacity-20" />
+              <div className="relative bg-white/5 backdrop-blur-3xl border border-white/10 p-12 rounded-[3rem] space-y-2">
+                <p className="text-xs font-black uppercase tracking-[0.4em] text-slate-500">Peak Performance</p>
+                <p className="text-9xl font-black italic tracking-tighter text-indigo-400">{maxNumbersReached}</p>
+              </div>
             </div>
 
             <button
               onClick={resetGame}
-              className="px-12 py-4 bg-white text-blue-900 rounded-xl font-bold text-2xl hover:bg-slate-100 transition-all shadow-lg transform hover:-translate-y-1"
+              className="px-16 py-6 bg-white text-slate-900 rounded-2xl font-black text-2xl uppercase tracking-widest hover:bg-slate-100 transition-all hover:scale-105 active:scale-95 shadow-2xl"
             >
-              Try Again
+              Re-Initiate
             </button>
-          </div>
+          </motion.div>
         )}
       </div>
     </GameShell>
